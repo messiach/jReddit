@@ -4,19 +4,23 @@ import com.github.jreddit.exception.InvalidURIException;
 import com.github.jreddit.utils.ApiEndpointUtils;
 import com.github.jreddit.utils.restclient.methodbuilders.HttpGetMethodBuilder;
 import com.github.jreddit.utils.restclient.methodbuilders.HttpPostMethodBuilder;
-import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.json.simple.parser.ParseException;
+import sun.misc.CharacterEncoder;
 
+import javax.swing.text.StyleConstants;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -29,17 +33,15 @@ import static com.github.jreddit.utils.restclient.methodbuilders.HttpPostMethodB
 public class HttpRestClient implements RestClient {
     private final HttpClient httpClient;
     private final ResponseHandler<Response> responseHandler;
-    private final RequestConfig globalConfig = RequestConfig.custom()
-            .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-            .setConnectionRequestTimeout(10000)
-            .build();
+    private final HttpParams basicParams = new BasicHttpParams();
+
     private String userAgent = "Omer's Reddit API Java Wrapper";
 
     public HttpRestClient() {
         // As we're currently managing cookies elsewhere we need to set our config to ignore them
-        this.httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(globalConfig)
-                .build();
+        basicParams.setParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 10000);
+        basicParams.setParameter(ClientPNames.COOKIE_POLICY, "ignoreCookies");
+        this.httpClient = new DefaultHttpClient(basicParams);
         this.responseHandler = new RestResponseHandler();
     }
 
@@ -110,7 +112,7 @@ public class HttpRestClient implements RestClient {
     }
 
     public Response post(HttpPostMethodBuilder postMethodBuilder, List<NameValuePair> params) throws IOException, ParseException {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, Consts.UTF_8);
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params, "UTF-8");
 
         postMethodBuilder.withUserAgent(userAgent);
         HttpPost request = postMethodBuilder.build();
