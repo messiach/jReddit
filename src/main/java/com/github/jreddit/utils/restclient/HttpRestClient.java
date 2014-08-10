@@ -10,17 +10,13 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.json.simple.parser.ParseException;
-import sun.misc.CharacterEncoder;
 
-import javax.swing.text.StyleConstants;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -40,7 +36,6 @@ public class HttpRestClient implements RestClient {
     public HttpRestClient() {
         // As we're currently managing cookies elsewhere we need to set our config to ignore them
         basicParams.setParameter(HttpConnectionParams.CONNECTION_TIMEOUT, 10000);
-        basicParams.setParameter(ClientPNames.COOKIE_POLICY, "ignoreCookies");
         this.httpClient = new DefaultHttpClient(basicParams);
         this.responseHandler = new RestResponseHandler();
     }

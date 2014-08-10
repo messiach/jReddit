@@ -9,6 +9,8 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 
 public class RestResponseHandler implements ResponseHandler<Response> {
 
@@ -35,7 +37,14 @@ public class RestResponseHandler implements ResponseHandler<Response> {
 
     private Response parse(HttpResponse httpResponse) throws IOException, ParseException {
         InputStream responseStream = httpResponse.getEntity().getContent();
-        String content = IOUtils.toString(responseStream, "UTF-8");
+        StringWriter stringWriter = new StringWriter();
+        InputStreamReader reader = new InputStreamReader(responseStream, "UTF-8");
+        int n;
+        char[] buffer = new char[1028];
+        while (-1 != (n = reader.read(buffer))) {
+            stringWriter.write(buffer, 0, n);
+        }
+        String content = stringWriter.getBuffer().toString();
         Object responseObject = jsonParser.parse(content);
         return new RestResponse(content, responseObject, httpResponse);
     }
